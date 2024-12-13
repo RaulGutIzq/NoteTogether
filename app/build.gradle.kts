@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.notetogether"
+    namespace = "com.raulin.notetogether"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.notetogether"
+        applicationId = "com.raulin.notetogether"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -48,6 +48,8 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.4.0-alpha05")
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

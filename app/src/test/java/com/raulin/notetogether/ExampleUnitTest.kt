@@ -1,4 +1,4 @@
-package com.example.notetogether
+package com.raulin.notetogether
 
 import org.junit.Test
 
