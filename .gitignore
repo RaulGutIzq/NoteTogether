@@ -15,3 +15,6 @@
 local.properties
 *.bak
 *.env
+gradle.xml
+misc.xml
+deploymentTargetSelector.xml
