@@ -30,6 +30,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.1.1"
+    }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -43,4 +51,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.material3)
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
 }
