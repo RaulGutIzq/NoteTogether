@@ -27,8 +27,11 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            MessageCard(Message("Android", "Jetpack Compose"))
+            AppTheme {
+                MessageCard(Message("Android", "Jetpack Compose"))
+            }
         }
     }
 
@@ -67,16 +70,21 @@ fun MessageCard(msg: Message) {
         }
     }
 }
-@Preview(name = "Light Mode")
+
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
+    name = "DefaultPreviewDark"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    name = "DefaultPreviewLight"
 )
 
 @Composable
 fun PreviewMessageCard() {
-    MessageCard(
-        msg = Message("Raulín", "Estoy usando Jetpack Compose")
-    )
+    AppTheme {
+        MessageCard(
+            msg = Message("Raul", "Estoy usando Jetpack Compose")
+        )
+    }
 }
