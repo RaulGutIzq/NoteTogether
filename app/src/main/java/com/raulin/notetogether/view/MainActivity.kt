@@ -12,6 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.raulin.notetogether.view.ui.theme.NoteTogetherTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -32,11 +36,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NoteTogetherTheme {
-                    MaterialDesignView()
-                }
+                MaterialDesignView()
             }
         }
     }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +61,7 @@ fun MaterialDesignView() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* Aádir onlick en controller */ },
-                shape  = CircleShape,
+                shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Icon(Icons.Filled.Add, "Añadir nota")
@@ -68,18 +72,51 @@ fun MaterialDesignView() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
+                .padding(16.dp)
         ) {
-            meterNotas()
+            NotasGrid()
         }
     }
 }
+
+
 @Composable
-fun meterNotas() {
-//O aqui o en controller
-//deberian añadirse las notas a 2
+fun NotasGrid() {
+    val notas = List(20) { "Nota #${it + 1}" }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(notas) { nota ->
+            NotaCard(nota)
+        }
+    }
 }
 
+@Composable
+fun NotaCard(nota: String) {
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(2f)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = nota,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+    }
+}
