@@ -55,7 +55,8 @@ fun MaterialDesignView() {
     var currentNote by remember { mutableStateOf<Note?>(null) }
     val notes = remember { mutableStateListOf<Note>() }
 
-  //  notes.addAll(generateRandomNotes(75))
+    // Agregar 75 notas aleatorias a la lista
+   //notes.addAll(generateRandomNotes(75))
 
     Scaffold(
         topBar = {
@@ -70,6 +71,7 @@ fun MaterialDesignView() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    // Abrir popup para añadir una nueva nota
                     currentNote = null
                     showDialog = true
                 },
@@ -89,6 +91,7 @@ fun MaterialDesignView() {
                 NotasGrid(
                     notes = notes,
                     onNoteClick = { note ->
+                        // Abrir popup para editar una nota existente
                         currentNote = note
                         showDialog = true
                     }
@@ -114,10 +117,15 @@ fun MaterialDesignView() {
                     }
                 }
                 showDialog = false
+            },
+            onDelete = { note ->
+                // Eliminar la nota de la lista
+                notes.remove(note)
             }
         )
     }
 }
+
 
 @Composable
 fun NotasGrid(
@@ -173,7 +181,8 @@ fun NotaCard(nota: Note, onClick: () -> Unit) {
 fun NoteDialog(
     note: Note?, // La nota a editar, o null si es una nueva
     onDismiss: () -> Unit,
-    onSave: (Note) -> Unit
+    onSave: (Note) -> Unit,
+    onDelete: (Note) -> Unit // Añadido para manejar la eliminación de una nota
 ) {
     // Estados para el título y el cuerpo de la nota
     var title by remember { mutableStateOf(note?.title ?: "") }
@@ -233,10 +242,25 @@ fun NoteDialog(
                         Text("Guardar")
                     }
                 }
+
+                // Botón de eliminar solo si estamos editando una nota existente
+                if (note != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            onDelete(note) // Elimina la nota
+                            onDismiss() // Cierra el diálogo
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Eliminar", color = MaterialTheme.colorScheme.onError)
+                    }
+                }
             }
         }
     }
 }
+
 
 fun generateRandomNotes(count: Int): List<Note> {
     val randomTitles = listOf(
