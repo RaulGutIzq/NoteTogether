@@ -187,6 +187,7 @@ fun NoteDialog(
     // Estados para el título y el cuerpo de la nota
     var title by remember { mutableStateOf(note?.title ?: "") }
     var body by remember { mutableStateOf(note?.body ?: "") }
+    var showConfirmDialog by remember { mutableStateOf(false) } // Estado para mostrar el diálogo de confirmación
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Surface(
@@ -247,13 +248,66 @@ fun NoteDialog(
                 if (note != null) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        onClick = {
-                            onDelete(note) // Elimina la nota
-                            onDismiss() // Cierra el diálogo
-                        },
+                        onClick = { showConfirmDialog = true }, // Muestra el diálogo de confirmación
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
                         Text("Eliminar", color = MaterialTheme.colorScheme.onError)
+                    }
+                }
+            }
+        }
+    }
+
+    // Mostrar el diálogo de confirmación
+    if (showConfirmDialog) {
+        ConfirmDialog(
+            message = "¿Estás seguro de que deseas eliminar esta nota?",
+            onConfirm = {
+                onDelete(note!!) // Elimina la nota
+                onDismiss() // Cierra el diálogo principal
+                showConfirmDialog = false // Cierra el diálogo de confirmación
+            },
+            onDismiss = { showConfirmDialog = false } // Cierra solo el diálogo de confirmación
+        )
+    }
+}
+
+@Composable
+fun ConfirmDialog(
+    message: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            tonalElevation = 8.dp,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancelar")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = onConfirm,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Confirmar", color = MaterialTheme.colorScheme.onError)
                     }
                 }
             }
