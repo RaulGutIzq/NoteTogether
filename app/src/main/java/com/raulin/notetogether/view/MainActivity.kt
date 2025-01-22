@@ -1,5 +1,6 @@
 package com.raulin.notetogether.view
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,21 +29,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 
 data class Note(
-    val id: Int = System.currentTimeMillis().toInt(), // Identificador único
-    val title: String,
-    val body: String
+    val id: String = System.currentTimeMillis().toString(), // Identificador único
+    val title: String = "",
+    val body: String = ""
 )
 
-class MainActivity : ComponentActivity() {
 
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             NoteTogetherTheme {
-                MaterialDesignView()
+                val auth = FirebaseAuth.getInstance()
+                val currentUser = auth.currentUser
+
+                if (currentUser != null) {
+                    // Usuario autenticado, cargar las notas del usuario
+                    MaterialDesignView(userId = currentUser.uid)
+                } else {
+                    // Si no está autenticado, redirigir a la pantalla de inicio de sesión
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                }
             }
         }
     }
@@ -50,13 +65,29 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MaterialDesignView() {
+fun MaterialDesignView(userId: String) {
     var showDialog by remember { mutableStateOf(false) }
     var currentNote by remember { mutableStateOf<Note?>(null) }
     val notes = remember { mutableStateListOf<Note>() }
+    val db = FirebaseFirestore.getInstance()
+    val notesRef = db.collection("notes").document(userId).collection("user_notes")
 
-    // Agregar 75 notas aleatorias a la lista
-   //notes.addAll(generateRandomNotes(75))
+    // Sincronizar las notas en tiempo real desde Firestore
+    LaunchedEffect(Unit) {
+        notesRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                // Manejar errores si los hay
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                notes.clear()
+                notes.addAll(snapshot.documents.mapNotNull { document ->
+                    document.toObject<Note>()?.copy(id = document.id)
+                })
+
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -107,20 +138,18 @@ fun MaterialDesignView() {
             onDismiss = { showDialog = false }, // Cerrar el popup
             onSave = { note ->
                 if (currentNote == null) {
-                    // Añadir nueva nota
-                    notes.add(note)
+                    // Añadir nueva nota a Firestore
+                    notesRef.add(note)
                 } else {
-                    // Actualizar la nota existente
-                    val index = notes.indexOf(currentNote)
-                    if (index != -1) {
-                        notes[index] = note
-                    }
+                    // Actualizar la nota existente en Firestore
+                    notesRef.document(note.id.toString()).set(note)
                 }
                 showDialog = false
             },
             onDelete = { note ->
-                // Eliminar la nota de la lista
-                notes.remove(note)
+                // Eliminar la nota de Firestore
+                notesRef.document(note.id.toString()).delete()
+                showDialog = false
             }
         )
     }
